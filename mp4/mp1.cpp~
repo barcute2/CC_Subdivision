@@ -1,0 +1,149 @@
+//  
+// Dancing I made with triangle meshes
+//
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#include <GL/glew.h>
+#include <GL/glut.h>
+#include <GL/glxew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+
+
+int nFPS = 30;
+float fRotateAngle = 0.f;
+GLfloat x = 0, y = 0;
+GLenum rotate = GL_FALSE;
+
+//constant to hold the value of pi, used for the sin and cos functions
+const int pi = 3.14159;
+
+void init(void)
+{
+	// init your data, setup OpenGL environment here
+	glClearColor( 0.0, 0.0, 0.0, 1.0 );
+	
+		
+}
+
+void display(void)
+{
+	//all the OpenGL display commands go here
+	glClear(GL_COLOR_BUFFER_BIT);
+	
+	glColor3f(1.0,0.0,0.0); // set current color to Red
+
+	//set up the meshes creating the I
+	glBegin(GL_TRIANGLE_STRIP);				
+		glVertex3f(-.6 + sin(x)/10,.6 * cos(x/10),0);
+		glVertex3f(-.2 + 2*sin(x)/10,.6 * cos(2*x/20),0);
+		glVertex3f(-.6 - sin(x)/10,1 * cos(x/20),0);
+		glVertex3f(.6 + sin(x)/10,1 * cos(2*x/20),0);
+		glVertex3f(.2 + 2 * sin(x)/10, .6 *cos(x/20),0);
+		glVertex3f(.6 - 2 * sin(x)/10,.6 * cos(x/20),0);
+		glVertex3f(.2 + 2 * sin(x)/10,.6 * cos(x/20),0);
+		glVertex3f(.6 + sin(x)/10,1 * cos(2*x/20),0);
+		glVertex3f(-.2 + 2*sin(x)/10,.6 * cos(2*x/20),0);
+		glVertex3f(.2 + 2 * sin(x)/10, .6 *cos(x/20), 0);
+		glVertex3f(-.2 + sin(x)/10, -.6 * cos(x/20),0);
+		glVertex3f(.2 - 2 *sin(x/2)/10, -.6 *cos(x/20),0);
+		glVertex3f(-.6 + sin(x)/10, -1 * cos(3*x/20), 0);
+		glVertex3f(.6 + 2 * sin(x)/10, -.6 *cos(x/30), 0);
+		glVertex3f(.6 - sin(x/3)/10, -1 * cos(6*x/20), 0);
+		glVertex3f(-.6 + sin(x)/10, -1 * cos(3*x/20), 0);
+		glVertex3f(-.2+ sin(x)/10, -.6 *cos(x/20), 0);
+		glVertex3f(-.6 * cos(2*x/20), -.6 - 2*sin(x)/10, 0);		
+	glEnd();
+	
+	glColor3f(1, 1, 1);
+	glBegin(GL_LINE_LOOP);
+		glVertex3f(-.6 - sin(x)/10,1 * cos(x/20),0);
+		glVertex3f(-.6 + sin(x)/10,.6 * cos(x/10),0);
+		glVertex3f(-.2 + 2*sin(x)/10,.6 * cos(2*x/20),0);
+		glVertex3f(-.2 + sin(x)/10, -.6 * cos(x/20),0);	
+		glVertex3f(-.6 * cos(2*x/20), -.6 - 2*sin(x)/10, 0);
+		glVertex3f(-.6 + sin(x)/10, -1 * cos(3*x/20), 0);
+		glVertex3f(.6 - sin(x/3)/10, -1 * cos(6*x/20), 0);
+		glVertex3f(.6 + 2 * sin(x)/10, -.6 *cos(x/30), 0);
+		glVertex3f(.2 - 2 *sin(x/2)/10, -.6 *cos(x/20),0);
+		glVertex3f(.2 + 2 * sin(x)/10, .6 *cos(x/20), 0);
+		glVertex3f(.6 - 2 * sin(x)/10,.6 * cos(x/20),0);
+		glVertex3f(.6 + sin(x)/10,1 * cos(2*x/20),0);
+	glEnd();
+	
+	glutSwapBuffers();	// swap front/back framebuffer to avoid flickering 	
+}
+
+
+
+void keyboard(unsigned char key, int x, int y)
+{
+	//keyboard control goes here
+	if (key == 27) 
+	{
+		// ESC hit, so quit
+		printf("demonstration finished.\n");
+		exit(0);
+	}
+	
+	if((key == 82) || (key == 114)){
+		// r or R was hit, start rotating
+		rotate = GL_TRUE;			
+	}	
+	
+	if((key == 119) || (key == 87)){	
+		// w or W was hit, display only the outlined triangles
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	
+	if((key == 70) || (key == 102)){
+		// f or F was hit, display the filled triangles
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}	
+}
+
+
+
+
+void timer(int v)
+{
+	// if user selected to rotate, increment x
+	if(rotate){
+		if(x < pi)
+			x += .01;
+		//if we reached pi, start from 0 again
+		else
+			x = 0;
+	}
+	glutTimerFunc(1000/nFPS,timer,v); // restart timer again
+}
+
+void idle(){	
+	glutPostRedisplay();
+}
+
+int main(int argc, char* argv[])
+{
+	glutInit(&argc, (char**)argv);
+
+	// set up for double-buffering & RGB color buffer
+	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB); 
+	glutInitWindowSize (500, 500); 
+	glutInitWindowPosition (100, 100);
+	glutCreateWindow ((const char*)"Dancing I");
+	
+	init(); // setting up user data & OpenGL environment
+	
+	// set up the call-back functions 
+	glutDisplayFunc(display);  // called when drawing 	
+	glutKeyboardFunc(keyboard); // called when received keyboard interaction	
+	glutIdleFunc(idle);
+	glutTimerFunc(100,timer,nFPS); // a periodic timer. Usually used for updating animation
+	
+	glutMainLoop(); // start the main message-callback loop
+
+	return 0;
+}
